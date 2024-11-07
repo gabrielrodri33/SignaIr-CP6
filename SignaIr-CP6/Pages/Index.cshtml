@@ -12,6 +12,8 @@
         .withUrl("/chatHub")
         .build();
 
+    let userJoined = false;
+
     connection.on("ReceiveMessage", (user, message) => {
         const msg = document.createElement("div");
         msg.textContent = `${user}: ${message}`;
@@ -23,6 +25,16 @@
     document.getElementById("sendButton").addEventListener("click", event => {
         const user = document.getElementById("userInput").value;
         const message = document.getElementById("messageInput").value;
+
+        if (user && !userJoined) {
+            connection.invoke("UserJoined", user)
+                .then(() => {
+                    userJoined = true;
+                })
+                .catch(err => console.error(err.toString()));
+        }
+
+
         connection.invoke("SendMessage", user, message).catch(err => console.error(err.toString()));
         event.preventDefault();
     });
