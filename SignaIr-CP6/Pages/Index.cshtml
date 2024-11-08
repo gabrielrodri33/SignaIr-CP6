@@ -1,41 +1,64 @@
 ﻿@page
-<div>
-    <input type="text" id="userInput" placeholder="Enter your name" />
-    <input type="text" id="messageInput" placeholder="Enter your message" />
-    <button id="sendButton">Send</button>
-</div>
-<div id="messagesList"></div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Room</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <div class="card shadow-sm">
+            <div class="card-header text-center bg-success text-white">
+                <h2>Chat Room</h2>
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                    <input type="text" id="userInput" class="form-control" placeholder="Enter your name">
+                </div>
+                <div class="form-group">
+                    <input type="text" id="messageInput" class="form-control" placeholder="Enter your message">
+                </div>
+                <button id="sendButton" class="btn btn-success btn-block">Send</button>
+                <div id="messagesList" class="mt-4 p-3 border rounded" style="max-height: 300px; overflow-y: auto; background-color: #f9f9f9;"></div>
+            </div>
+        </div>
+    </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js"></script>
-<script>
-    const connection = new signalR.HubConnectionBuilder()
-        .withUrl("/chatHub")
-        .build();
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js"></script>
+    <script>
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/chatHub")
+            .build();
 
-    let userJoined = false;
+        let userJoined = false;
 
-    connection.on("ReceiveMessage", (user, message) => {
-        const msg = document.createElement("div");
-        msg.textContent = `${user}: ${message}`;
-        document.getElementById("messagesList").appendChild(msg);
-    });
+        connection.on("ReceiveMessage", (user, message) => {
+            const msg = document.createElement("div");
+            msg.className = "alert alert-secondary";
+            msg.textContent = `${user}: ${message}`;
+            document.getElementById("messagesList").appendChild(msg);
+        });
 
-    connection.start().catch(err => console.error(err.toString()));
+        connection.start().catch(err => console.error(err.toString()));
 
-    document.getElementById("sendButton").addEventListener("click", event => {
-        const user = document.getElementById("userInput").value;
-        const message = document.getElementById("messageInput").value;
+        document.getElementById("sendButton").addEventListener("click", event => {
+            const user = document.getElementById("userInput").value;
+            const message = document.getElementById("messageInput").value;
 
-        if (user && !userJoined) {
-            connection.invoke("UserJoined", user)
-                .then(() => {
-                    userJoined = true;
-                })
-                .catch(err => console.error(err.toString()));
-        }
+            if (user && !userJoined) {
+                connection.invoke("UserJoined", user)
+                    .then(() => {
+                        userJoined = true;
+                    })
+                    .catch(err => console.error(err.toString()));
+            }
 
+            connection.invoke("SendMessage", user, message).catch(err => console.error(err.toString()));
+            event.preventDefault();
+        });
+    </script>
+</body>
+</html>
 
-        connection.invoke("SendMessage", user, message).catch(err => console.error(err.toString()));
-        event.preventDefault();
-    });
-</script>
