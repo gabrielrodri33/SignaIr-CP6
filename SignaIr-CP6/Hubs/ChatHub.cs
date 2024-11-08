@@ -43,7 +43,7 @@ namespace SignaIr_CP6.Hubs
             }
 
             Console.WriteLine($"Mensagem recebida no servidor: {user}: {message}");
-            
+
             var chatMessage = new ChatMessage { User = user, Message = message };
             _messageHistory.Add(chatMessage);
 
