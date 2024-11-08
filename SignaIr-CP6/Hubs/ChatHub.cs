@@ -24,6 +24,12 @@ namespace SignaIr_CP6.Hubs
                 Console.WriteLine($"ConnectionId: {user.Key}, Username: {user.Value}");
             }
 
+            foreach (var message in _messageHistory)
+            {
+                await Clients.Caller.SendAsync("ReceiveMessage", message.User, message.Message);
+            }
+            await Clients.Caller.SendAsync("ReceiveMessageHistory", _messageHistory);
+
             //PrintMessageHistory();
         }
 
@@ -49,12 +55,6 @@ namespace SignaIr_CP6.Hubs
         //Método para enviar o histórico de mensagem ao novo usuário
         public override async Task OnConnectedAsync()
         {
-            foreach (var message in _messageHistory)
-            {
-                await Clients.Caller.SendAsync("ReceiveMessage", message.User, message.Message);
-            }
-            await Clients.Caller.SendAsync("ReceiveMessageHistory", _messageHistory);
-
             await base.OnConnectedAsync();
         }
 
